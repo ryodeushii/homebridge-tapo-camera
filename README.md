@@ -1,5 +1,6 @@
-# homebridge-tapo-camera
+# homebridge-tapo-camera-ptz
 
+### FORKED FROM [homebridge-tapo-camera](https://github.com/kopiro/homebridge-tapo-camera) in order to add PTZ support
 Make your TP-Link TAPO security camera compatible with Homekit through Homebridge / HOOBS.
 
 [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
@@ -12,10 +13,10 @@ If your video feed is not working, try to check if any of the parameters at the 
 
 > [!IMPORTANT]
 > ~On firmware build 230921 and higher, [please follow this guide](https://github.com/JurajNyiri/HomeAssistant-Tapo-Control/blob/main/add_camera_with_new_firmware.md) to make your camera compatible with this integration.~
-> 
+>
 > **Update March 2025**
 > In the Tapo app, go to "Me" (bottom right), then "Tapo Lab", then "Third-Party Compatibility", change to "On" and the integration should start working again.
-> 
+>
 
 ### Toggle accessories
 
@@ -45,7 +46,7 @@ Therefore you can set up automations and Homekit can send you notification in th
 
 Make sure you activate "Activity Notifications" in the "Status and Notifications" tab in the accessory.
 
-> [!NOTE]  
+> [!NOTE]
 > Some people may have issues resulting the plugin crashing at startup when this option is enabled. If you see an error like `Error: read ECONNRESET at TCP.onStreamRead` try to disable the motion sensor by setting `disableMotionSensorAccessory` to `true`
 
 ## Installation
@@ -64,6 +65,6 @@ It is highly recommended that you use either Homebridge Config UI X or the HOOBS
 
 The plugin should take care of installing the `ffmpeg` automatically.
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > If you're getting errors like `FFmpeg exited with code: 1 and signal: null (Error)`, please follow the instructions here on how to install [ffmpeg-for-homebridge](https://github.com/homebridge/ffmpeg-for-homebridge) binaries manually.
 

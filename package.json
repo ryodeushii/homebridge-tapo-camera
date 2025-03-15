@@ -1,8 +1,8 @@
 {
-  "displayName": "Homebridge TAPO Camera",
-  "name": "homebridge-tapo-camera",
+  "displayName": "Homebridge TAPO Camera-ptz",
+  "name": "homebridge-tapo-camera-ptz",
   "version": "2.5.2",
-  "description": "Homebridge plugin for TP-Link TAPO security cameras",
+  "description": "Homebridge plugin for TP-Link TAPO security cameras with PTZ",
   "main": "dist/index.js",
   "license": "ISC",
   "scripts": {
