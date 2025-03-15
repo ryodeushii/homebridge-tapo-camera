@@ -68,7 +68,7 @@ export class CameraAccessory {
 
   constructor(
     private readonly platform: CameraPlatform,
-    private readonly config: CameraConfig
+    private readonly config: CameraConfig,
   ) {
     // @ts-expect-error - private property
     this.log = {
@@ -80,7 +80,7 @@ export class CameraAccessory {
     this.accessory = new this.api.platformAccessory(
       this.config.name,
       this.api.hap.uuid.generate(this.config.name),
-      this.api.hap.Categories.CAMERA
+      this.api.hap.Categories.CAMERA,
     );
     this.camera = new TAPOCamera(this.log, this.config);
   }
@@ -93,15 +93,15 @@ export class CameraAccessory {
       .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "TAPO")
       .setCharacteristic(
         this.api.hap.Characteristic.Model,
-        basicInfo.device_info
+        basicInfo.device_info,
       )
       .setCharacteristic(
         this.api.hap.Characteristic.SerialNumber,
-        basicInfo.mac
+        basicInfo.mac,
       )
       .setCharacteristic(
         this.api.hap.Characteristic.FirmwareRevision,
-        basicInfo.sw_version
+        basicInfo.sw_version,
       );
   }
 
@@ -111,13 +111,15 @@ export class CameraAccessory {
       const panLeftService = this.accessory.addService(
         this.api.hap.Service.Switch,
         `${this.config.name} Pan Left`,
-        'panLeft'
+        "panLeft",
       );
-      panLeftService.getCharacteristic(this.api.hap.Characteristic.On)
+      panLeftService
+        .getCharacteristic(this.api.hap.Characteristic.On)
         .onSet(async (value) => {
           if (value) {
-            await this.camera.panCamera('left');
-            panLeftService.updateCharacteristic(this.api.hap.Characteristic.On, false);
+            await this.camera.panCamera("left");
+          } else {
+            await this.camera.stopMovement();
           }
         });
 
@@ -125,13 +127,15 @@ export class CameraAccessory {
       const panRightService = this.accessory.addService(
         this.api.hap.Service.Switch,
         `${this.config.name} Pan Right`,
-        'panRight'
+        "panRight",
       );
-      panRightService.getCharacteristic(this.api.hap.Characteristic.On)
+      panRightService
+        .getCharacteristic(this.api.hap.Characteristic.On)
         .onSet(async (value) => {
           if (value) {
-            await this.camera.panCamera('right');
-            panRightService.updateCharacteristic(this.api.hap.Characteristic.On, false);
+            await this.camera.panCamera("right");
+          } else {
+            await this.camera.stopMovement();
           }
         });
 
@@ -139,13 +143,15 @@ export class CameraAccessory {
       const tiltUpService = this.accessory.addService(
         this.api.hap.Service.Switch,
         `${this.config.name} Tilt Up`,
-        'tiltUp'
+        "tiltUp",
       );
-      tiltUpService.getCharacteristic(this.api.hap.Characteristic.On)
+      tiltUpService
+        .getCharacteristic(this.api.hap.Characteristic.On)
         .onSet(async (value) => {
           if (value) {
-            await this.camera.tiltCamera('up');
-            tiltUpService.updateCharacteristic(this.api.hap.Characteristic.On, false);
+            await this.camera.tiltCamera("up");
+          } else {
+            await this.camera.stopMovement();
           }
         });
 
@@ -153,37 +159,39 @@ export class CameraAccessory {
       const tiltDownService = this.accessory.addService(
         this.api.hap.Service.Switch,
         `${this.config.name} Tilt Down`,
-        'tiltDown'
+        "tiltDown",
       );
-      tiltDownService.getCharacteristic(this.api.hap.Characteristic.On)
+      tiltDownService
+        .getCharacteristic(this.api.hap.Characteristic.On)
         .onSet(async (value) => {
           if (value) {
-            await this.camera.tiltCamera('down');
-            tiltDownService.updateCharacteristic(this.api.hap.Characteristic.On, false);
+            await this.camera.tiltCamera("down");
+          } else {
+            await this.camera.stopMovement();
           }
         });
 
-      this.log.debug('Pan and Tilt accessories setup done');
+      this.log.debug("Pan and Tilt accessories setup done");
     } catch (err) {
-      this.log.error('Error setting up Pan and Tilt accessories:', err);
+      this.log.error("Error setting up Pan and Tilt accessories:", err);
     }
   }
 
-  private setupToggleAccessory(name: string, tapoServiceStr: keyof Status ) {
+  private setupToggleAccessory(name: string, tapoServiceStr: keyof Status) {
     try {
       const toggleService = this.accessory.addService(
         this.api.hap.Service.Switch,
         name,
-        tapoServiceStr
+        tapoServiceStr,
       );
       this.toggleAccessories[tapoServiceStr] = toggleService;
 
       toggleService.addOptionalCharacteristic(
-        this.api.hap.Characteristic.ConfiguredName
+        this.api.hap.Characteristic.ConfiguredName,
       );
       toggleService.setCharacteristic(
         this.api.hap.Characteristic.ConfiguredName,
-        name
+        name,
       );
 
       toggleService
@@ -200,7 +208,7 @@ export class CameraAccessory {
 
             this.log.debug(
               `Status "${tapoServiceStr}" not found in status`,
-              cameraStatus
+              cameraStatus,
             );
             return null;
           } catch (err) {
@@ -211,13 +219,13 @@ export class CameraAccessory {
         .onSet(async (newValue) => {
           try {
             this.log.debug(
-              `Setting "${tapoServiceStr}" to ${newValue ? "on" : "off"}...`
+              `Setting "${tapoServiceStr}" to ${newValue ? "on" : "off"}...`,
             );
             this.camera.setStatus(tapoServiceStr, Boolean(newValue));
           } catch (err) {
             this.log.error("Error setting status:", err);
             throw new this.api.hap.HapStatusError(
-              this.api.hap.HAPStatus.RESOURCE_DOES_NOT_EXIST
+              this.api.hap.HAPStatus.RESOURCE_DOES_NOT_EXIST,
             );
           }
         });
@@ -226,14 +234,14 @@ export class CameraAccessory {
         "Error setting up toggle accessory",
         name,
         tapoServiceStr,
-        err
+        err,
       );
     }
   }
 
   private getVideoConfig(): VideoConfig {
     const streamUrl = this.camera.getAuthenticatedStreamUrl(
-      Boolean(this.config.lowQuality)
+      Boolean(this.config.lowQuality),
     );
 
     const vcodec = this.config.videoCodec ?? "copy";
@@ -270,7 +278,7 @@ export class CameraAccessory {
           videoConfig: this.getVideoConfig(),
         },
         this.api,
-        this.api.hap
+        this.api.hap,
       );
 
       this.accessory.configureController(delegate.controller);
@@ -286,15 +294,15 @@ export class CameraAccessory {
       this.motionSensorService = this.accessory.addService(
         this.platform.api.hap.Service.MotionSensor,
         "Motion Sensor",
-        "motion"
+        "motion",
       );
 
       this.motionSensorService.addOptionalCharacteristic(
-        this.api.hap.Characteristic.ConfiguredName
+        this.api.hap.Characteristic.ConfiguredName,
       );
       this.motionSensorService.setCharacteristic(
         this.api.hap.Characteristic.ConfiguredName,
-        "Motion Sensor"
+        "Motion Sensor",
       );
 
       const eventEmitter = await this.camera.getEventEmitter();
@@ -303,7 +311,7 @@ export class CameraAccessory {
 
         this.motionSensorService?.updateCharacteristic(
           this.api.hap.Characteristic.MotionDetected,
-          motionDetected
+          motionDetected,
         );
       });
     } catch (err) {
@@ -359,35 +367,35 @@ export class CameraAccessory {
     if (!this.config.disableEyesToggleAccessory) {
       this.setupToggleAccessory(
         this.config.eyesToggleAccessoryName || "Eyes",
-        "eyes"
+        "eyes",
       );
     }
 
     if (!this.config.disableAlarmToggleAccessory) {
       this.setupToggleAccessory(
         this.config.alarmToggleAccessoryName || "Alarm",
-        "alarm"
+        "alarm",
       );
     }
 
     if (!this.config.disableNotificationsToggleAccessory) {
       this.setupToggleAccessory(
         this.config.notificationsToggleAccessoryName || "Notifications",
-        "notifications"
+        "notifications",
       );
     }
 
     if (!this.config.disableMotionDetectionToggleAccessory) {
       this.setupToggleAccessory(
         this.config.motionDetectionToggleAccessoryName || "Motion Detection",
-        "motionDetection"
+        "motionDetection",
       );
     }
 
     if (!this.config.disableLEDToggleAccessory) {
       this.setupToggleAccessory(
         this.config.ledToggleAccessoryName || "LED",
-        "led"
+        "led",
       );
     }
 

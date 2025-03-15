@@ -99,15 +99,24 @@ export class OnvifCamera {
           this.log.error("Failed to pan camera:", err);
           return;
         }
-        setTimeout(() => {
-          onvifDevice.stop((stopErr: unknown) => {
-            if (stopErr) {
-              this.log.error("Failed to stop camera movement:", stopErr);
-            }
-          });
-        }, this.STEP_DURATION);
+        // setTimeout(() => {
+        //   onvifDevice.stop((stopErr: unknown) => {
+        //     if (stopErr) {
+        //       this.log.error("Failed to stop camera movement:", stopErr);
+        //     }
+        //   });
+        // }, this.STEP_DURATION);
       },
     );
+  }
+
+  async stopMovement() {
+    const onvifDevice = await this.getDevice();
+    onvifDevice.stop((stopErr: unknown) => {
+      if (stopErr) {
+        this.log.error("Failed to stop camera movement:", stopErr);
+      }
+    });
   }
 
   async tiltCamera(direction: "up" | "down") {
@@ -125,13 +134,13 @@ export class OnvifCamera {
           this.log.error("Failed to tilt camera:", err);
           return;
         }
-        setTimeout(() => {
-          onvifDevice.stop((stopErr: unknown) => {
-            if (stopErr) {
-              this.log.error("Failed to stop camera movement:", stopErr);
-            }
-          });
-        }, this.STEP_DURATION);
+        // setTimeout(() => {
+        //   onvifDevice.stop((stopErr: unknown) => {
+        //     if (stopErr) {
+        //       this.log.error("Failed to stop camera movement:", stopErr);
+        //     }
+        //   });
+        // }, this.STEP_DURATION);
       },
     );
   }
