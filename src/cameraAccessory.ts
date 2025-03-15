@@ -113,6 +113,9 @@ export class CameraAccessory {
         `${this.config.name} Pan Left`,
         "panLeft",
       );
+      panLeftService.addOptionalCharacteristic(this.api.hap.Characteristic.ConfiguredName);
+      panLeftService.setCharacteristic(this.api.hap.Characteristic.ConfiguredName, `${this.config.name} Pan Left`);
+
       panLeftService
         .getCharacteristic(this.api.hap.Characteristic.On)
         .onSet(async (value) => {
@@ -129,6 +132,8 @@ export class CameraAccessory {
         `${this.config.name} Pan Right`,
         "panRight",
       );
+      panRightService.addOptionalCharacteristic(this.api.hap.Characteristic.ConfiguredName);
+      panRightService.setCharacteristic(this.api.hap.Characteristic.ConfiguredName, `${this.config.name} Pan Right`);
       panRightService
         .getCharacteristic(this.api.hap.Characteristic.On)
         .onSet(async (value) => {
@@ -145,6 +150,8 @@ export class CameraAccessory {
         `${this.config.name} Tilt Up`,
         "tiltUp",
       );
+      tiltUpService.addOptionalCharacteristic(this.api.hap.Characteristic.ConfiguredName);
+      tiltUpService.setCharacteristic(this.api.hap.Characteristic.ConfiguredName, `${this.config.name} Tilt Up`);
       tiltUpService
         .getCharacteristic(this.api.hap.Characteristic.On)
         .onSet(async (value) => {
@@ -161,6 +168,8 @@ export class CameraAccessory {
         `${this.config.name} Tilt Down`,
         "tiltDown",
       );
+      tiltDownService.addOptionalCharacteristic(this.api.hap.Characteristic.ConfiguredName);
+      tiltDownService.setCharacteristic(this.api.hap.Characteristic.ConfiguredName, `${this.config.name} Tilt Down`);
       tiltDownService
         .getCharacteristic(this.api.hap.Characteristic.On)
         .onSet(async (value) => {
