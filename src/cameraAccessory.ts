@@ -105,7 +105,71 @@ export class CameraAccessory {
       );
   }
 
-  private setupToggleAccessory(name: string, tapoServiceStr: keyof Status) {
+  private async setupPanTiltAccessory() {
+    try {
+      // Pan left button
+      const panLeftService = this.accessory.addService(
+        this.api.hap.Service.Switch,
+        `${this.config.name} Pan Left`,
+        'panLeft'
+      );
+      panLeftService.getCharacteristic(this.api.hap.Characteristic.On)
+        .onSet(async (value) => {
+          if (value) {
+            await this.camera.panCamera('left');
+            panLeftService.updateCharacteristic(this.api.hap.Characteristic.On, false);
+          }
+        });
+
+      // Pan right button
+      const panRightService = this.accessory.addService(
+        this.api.hap.Service.Switch,
+        `${this.config.name} Pan Right`,
+        'panRight'
+      );
+      panRightService.getCharacteristic(this.api.hap.Characteristic.On)
+        .onSet(async (value) => {
+          if (value) {
+            await this.camera.panCamera('right');
+            panRightService.updateCharacteristic(this.api.hap.Characteristic.On, false);
+          }
+        });
+
+      // Tilt up button
+      const tiltUpService = this.accessory.addService(
+        this.api.hap.Service.Switch,
+        `${this.config.name} Tilt Up`,
+        'tiltUp'
+      );
+      tiltUpService.getCharacteristic(this.api.hap.Characteristic.On)
+        .onSet(async (value) => {
+          if (value) {
+            await this.camera.tiltCamera('up');
+            tiltUpService.updateCharacteristic(this.api.hap.Characteristic.On, false);
+          }
+        });
+
+      // Tilt down button
+      const tiltDownService = this.accessory.addService(
+        this.api.hap.Service.Switch,
+        `${this.config.name} Tilt Down`,
+        'tiltDown'
+      );
+      tiltDownService.getCharacteristic(this.api.hap.Characteristic.On)
+        .onSet(async (value) => {
+          if (value) {
+            await this.camera.tiltCamera('down');
+            tiltDownService.updateCharacteristic(this.api.hap.Characteristic.On, false);
+          }
+        });
+
+      this.log.debug('Pan and Tilt accessories setup done');
+    } catch (err) {
+      this.log.error('Error setting up Pan and Tilt accessories:', err);
+    }
+  }
+
+  private setupToggleAccessory(name: string, tapoServiceStr: keyof Status ) {
     try {
       const toggleService = this.accessory.addService(
         this.api.hap.Service.Switch,
@@ -290,6 +354,8 @@ export class CameraAccessory {
       this.setupCameraStreaming(basicInfo);
     }
 
+    this.setupPanTiltAccessory();
+
     if (!this.config.disableEyesToggleAccessory) {
       this.setupToggleAccessory(
         this.config.eyesToggleAccessoryName || "Eyes",
@@ -328,6 +394,8 @@ export class CameraAccessory {
     if (!this.config.disableMotionSensorAccessory) {
       this.setupMotionSensorAccessory();
     }
+
+    this.setupToggleAccessory("Move right", "moveRight");
 
     // // Publish as external accessory
     this.log.debug("Publishing accessory...");

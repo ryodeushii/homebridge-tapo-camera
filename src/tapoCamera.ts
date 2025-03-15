@@ -38,6 +38,7 @@ export type Status = {
   notifications: boolean | undefined;
   motionDetection: boolean | undefined;
   led: boolean | undefined;
+  moveRight: boolean | undefined;
 };
 
 export class TAPOCamera extends OnvifCamera {
@@ -60,7 +61,7 @@ export class TAPOCamera extends OnvifCamera {
 
   constructor(
     protected readonly log: Logging,
-    protected readonly config: CameraConfig
+    protected readonly config: CameraConfig,
   ) {
     super(log, config);
 
@@ -176,7 +177,7 @@ export class TAPOCamera extends OnvifCamera {
         deviceConfirm,
         nonce,
         cnonce: this,
-      }
+      },
     );
 
     return this.passwordEncryptionMethod !== null;
@@ -216,7 +217,7 @@ export class TAPOCamera extends OnvifCamera {
 
     const responseLogin = await this.fetch(
       `https://${this.config.ipAddress}`,
-      fetchParams
+      fetchParams,
     );
     const responseLoginData =
       (await responseLogin.json()) as TAPOCameraRefreshStokResponse;
@@ -226,7 +227,7 @@ export class TAPOCamera extends OnvifCamera {
     if (!responseLoginData) {
       this.log.debug(
         "refreshStok: empty response login data, raising exception",
-        responseLogin.status
+        responseLogin.status,
       );
       throw new Error("Empty response login data");
     }
@@ -234,7 +235,7 @@ export class TAPOCamera extends OnvifCamera {
     this.log.debug(
       "refreshStok: Login response",
       responseLogin.status,
-      responseLoginData
+      responseLoginData,
     );
 
     if (
@@ -243,7 +244,7 @@ export class TAPOCamera extends OnvifCamera {
     ) {
       this.log.debug(
         "refreshStok: invalid credentials, raising exception",
-        responseLogin.status
+        responseLogin.status,
       );
       throw new Error("Invalid credentials");
     }
@@ -288,7 +289,7 @@ export class TAPOCamera extends OnvifCamera {
         if (!responseData) {
           this.log.debug(
             "refreshStock: empty response start_seq data, raising exception",
-            response.status
+            response.status,
           );
           throw new Error("Empty response start_seq data");
         }
@@ -296,7 +297,7 @@ export class TAPOCamera extends OnvifCamera {
         this.log.debug(
           "refreshStok: start_seq response",
           response.status,
-          JSON.stringify(responseData)
+          JSON.stringify(responseData),
         );
 
         if (responseData.result?.start_seq) {
@@ -320,7 +321,7 @@ export class TAPOCamera extends OnvifCamera {
           this.log.debug(
             `refreshStock: Invalid device confirm, retrying: ${loginRetryCount}/${MAX_LOGIN_RETRIES}.`,
             responseLogin.status,
-            responseLoginData
+            responseLoginData,
           );
           return this.refreshStok(loginRetryCount + 1);
         }
@@ -328,7 +329,7 @@ export class TAPOCamera extends OnvifCamera {
         this.log.debug(
           "refreshStock: Invalid device confirm and loginRetryCount exhausted, raising exception",
           loginRetryCount,
-          responseLoginData
+          responseLoginData,
         );
         throw new Error("Invalid device confirm");
       }
@@ -345,7 +346,7 @@ export class TAPOCamera extends OnvifCamera {
       this.log.debug("refreshStok: temporary suspension", responseData);
 
       throw new Error(
-        `Temporary Suspension: Try again in ${responseData.result.data.sec_left} seconds`
+        `Temporary Suspension: Try again in ${responseData.result.data.sec_left} seconds`,
       );
     }
 
@@ -357,7 +358,7 @@ export class TAPOCamera extends OnvifCamera {
       this.log.debug("refreshStok: temporary suspension", responseData);
 
       throw new Error(
-        `refreshStok: Temporary Suspension: Try again in ${responseData.data.sec_left} seconds`
+        `refreshStok: Temporary Suspension: Try again in ${responseData.data.sec_left} seconds`,
       );
     }
 
@@ -374,7 +375,7 @@ export class TAPOCamera extends OnvifCamera {
       this.log.debug(
         `refreshStock: Unexpected response, retrying: ${loginRetryCount}/${MAX_LOGIN_RETRIES}.`,
         response.status,
-        responseData
+        responseData,
       );
       return this.refreshStok(loginRetryCount + 1);
     }
@@ -402,7 +403,7 @@ export class TAPOCamera extends OnvifCamera {
       this.log.debug(
         "isSecureConnection response",
         response.status,
-        JSON.stringify(responseData)
+        JSON.stringify(responseData),
       );
 
       this.isSecureConnectionValue =
@@ -446,7 +447,7 @@ export class TAPOCamera extends OnvifCamera {
     let ct_bytes = cipher.update(
       this.encryptPad(request, AES_BLOCK_SIZE),
       "utf-8",
-      "hex"
+      "hex",
     );
     ct_bytes += cipher.final("hex");
     return Buffer.from(ct_bytes, "hex");
@@ -462,7 +463,7 @@ export class TAPOCamera extends OnvifCamera {
     const decipher = crypto.createDecipheriv(
       "aes-128-cbc",
       this.lsk!,
-      this.ivb!
+      this.ivb!,
     );
     let decrypted = decipher.update(response, "base64", "utf-8");
     decrypted += decipher.final("utf-8");
@@ -500,14 +501,14 @@ export class TAPOCamera extends OnvifCamera {
 
   private async apiRequest(
     req: TAPOCameraRequest,
-    loginRetryCount = 0
+    loginRetryCount = 0,
   ): Promise<TAPOCameraResponse> {
     const reqJson = JSON.stringify(req);
 
     if (this.pendingAPIRequests.has(reqJson)) {
       this.log.debug("API request already pending", reqJson);
       return this.pendingAPIRequests.get(
-        reqJson
+        reqJson,
       ) as Promise<TAPOCameraResponse>;
     } else {
       this.log.debug("New API request", reqJson);
@@ -529,7 +530,7 @@ export class TAPOCamera extends OnvifCamera {
               method: "securePassthrough",
               params: {
                 request: Buffer.from(
-                  this.encryptRequest(JSON.stringify(req))
+                  this.encryptRequest(JSON.stringify(req)),
                 ).toString("base64"),
               },
             };
@@ -551,7 +552,7 @@ export class TAPOCamera extends OnvifCamera {
           // but it's indicating an expiring token, therefore refresh the token next time
           if (isSecureConnection && response.status === 500) {
             this.log.debug(
-              "Stok expired, reauthenticating on next request, setting STOK to undefined"
+              "Stok expired, reauthenticating on next request, setting STOK to undefined",
             );
             this.stok = undefined;
           }
@@ -563,10 +564,10 @@ export class TAPOCamera extends OnvifCamera {
               responseDataTmp as TAPOCameraEncryptedResponse;
             if (encryptedResponse?.result?.response) {
               const decryptedResponse = this.decryptResponse(
-                encryptedResponse.result.response
+                encryptedResponse.result.response,
               );
               responseData = JSON.parse(
-                decryptedResponse
+                decryptedResponse,
               ) as TAPOCameraResponse;
             }
           } else {
@@ -576,7 +577,7 @@ export class TAPOCamera extends OnvifCamera {
           this.log.debug(
             "API response",
             response.status,
-            JSON.stringify(responseData)
+            JSON.stringify(responseData),
           );
 
           // Log error codes
@@ -587,7 +588,7 @@ export class TAPOCamera extends OnvifCamera {
                 ? ERROR_CODES_MAP[errorCode as keyof typeof ERROR_CODES_MAP]
                 : "Unknown error";
             this.log.debug(
-              `API request failed with specific error code ${errorCode}: ${errorMessage}`
+              `API request failed with specific error code ${errorCode}: ${errorMessage}`,
             );
           }
 
@@ -598,7 +599,7 @@ export class TAPOCamera extends OnvifCamera {
           ) {
             this.log.debug(
               "API request failed, reauth now and trying same request again",
-              responseData
+              responseData,
             );
             this.stok = undefined;
             return this.apiRequest(req, loginRetryCount + 1);
@@ -609,7 +610,7 @@ export class TAPOCamera extends OnvifCamera {
         } finally {
           this.pendingAPIRequests.delete(reqJson);
         }
-      })()
+      })(),
     );
 
     return this.pendingAPIRequests.get(reqJson) as Promise<TAPOCameraResponse>;
@@ -617,7 +618,7 @@ export class TAPOCamera extends OnvifCamera {
 
   static SERVICE_MAP: Record<
     keyof Status,
-    (value: boolean) => TAPOCameraSetRequest
+    undefined | ((value: boolean) => TAPOCameraSetRequest)
   > = {
     eyes: (value) => ({
       method: "setLensMaskConfig",
@@ -671,13 +672,14 @@ export class TAPOCamera extends OnvifCamera {
         },
       },
     }),
+    moveRight: undefined,
   };
 
   async setStatus(service: keyof Status, value: boolean) {
     const responseData = await this.apiRequest({
       method: "multipleRequest",
       params: {
-        requests: [TAPOCamera.SERVICE_MAP[service](value)],
+        requests:TAPOCamera.SERVICE_MAP[service] ?  [TAPOCamera.SERVICE_MAP[service](value)] : [],
       },
     });
 
@@ -685,9 +687,9 @@ export class TAPOCamera extends OnvifCamera {
       throw new Error(`Failed to perform ${service} action`);
     }
 
-    const method = TAPOCamera.SERVICE_MAP[service](value).method;
+    const method = TAPOCamera.SERVICE_MAP[service]?.(value).method;
     const operation = responseData.result.responses.find(
-      (e) => e.method === method
+      (e) => e.method === method,
     );
     if (operation?.error_code !== 0) {
       throw new Error(`Failed to perform ${service} action`);
@@ -768,14 +770,15 @@ export class TAPOCamera extends OnvifCamera {
     });
 
     const operations = responseData.result.responses;
+    console.log(operations);
 
     const alert = operations.find((r) => r.method === "getAlertConfig");
     const lensMask = operations.find((r) => r.method === "getLensMaskConfig");
     const notifications = operations.find(
-      (r) => r.method === "getMsgPushConfig"
+      (r) => r.method === "getMsgPushConfig",
     );
     const motionDetection = operations.find(
-      (r) => r.method === "getDetectionConfig"
+      (r) => r.method === "getDetectionConfig",
     );
     const led = operations.find((r) => r.method === "getLedStatus");
 
@@ -801,6 +804,7 @@ export class TAPOCamera extends OnvifCamera {
         ? motionDetection.result.motion_detection.motion_det.enabled === "on"
         : undefined,
       led: led ? led.result.led.config.enabled === "on" : undefined,
+      moveRight: true,
     };
   }
 }
